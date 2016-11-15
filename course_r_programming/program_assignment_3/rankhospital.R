@@ -49,17 +49,13 @@ rankhospital <- function(state, outcome, num){
     #convert target outcome column to numeric
     data.hospital.outcome.state[outcome.selected.name] <- as.numeric(data.hospital.outcome.state[[outcome.selected.name]])
     
-    #capture list of distinct target outcome column values in a new data.frame data.hospital.outcome.state.rank
-    data.hospital.outcome.state.rank <- unique(data.hospital.outcome.state[outcome.selected.name])
-    names(data.hospital.outcome.state.rank) <- c("Value") #assign name "Value" to target outcome value column
-    data.hospital.outcome.state.rank$Rank <- rank(data.hospital.outcome.state.rank) #rank to target outcome values and store the ranks in newly created column "Rank"
+    #reorder data.hospital.outcome.state by target outcome column, then by Hostpital Name
+    data.hospital.outcome.state <- data.hospital.outcome.state[order(data.hospital.outcome.state[outcome.selected.name], data.hospital.outcome.state$Hospital.Name), ]
     
-    #merge data.hospital.outcome.state and data.hospital.outcome.state.rank by target outcome columm
-    #stored the merger product back in data.hospital.outcome.state
-    data.hospital.outcome.state <- merge(x = data.hospital.outcome.state, y = data.hospital.outcome.state.rank, by.x = outcome.selected.name, by.y = "Value")
-    #now we have all hospital values ranked
-    #all hospitals with the same target outcome value will have the same rank
+    #Assign rank and store in a new column Rank
+    data.hospital.outcome.state$Rank <- rank(data.hospital.outcome.state[outcome.selected.name], ties.method = "first")
     
+
     #if num is "best" set num value to the min rank
     if(tolower(num) == "best"){
         num <- min(data.hospital.outcome.state$Rank)
@@ -69,10 +65,14 @@ rankhospital <- function(state, outcome, num){
         num <- max(data.hospital.outcome.state$Rank)
     }
 
-    #capture all hosputals with Rank == num in data frame data.hospital.outcome.state.final
-    data.hospital.outcome.state.final <- data.hospital.outcome.state[data.hospital.outcome.state$Rank == num, ]
+    #capture all hospitals with Rank == num
+    ret_value <- data.hospital.outcome.state[data.hospital.outcome.state$Rank == num, "Hospital.Name"]
     
-    #sort data.hospital.outcome.state.final by hospital name and return the first record
-    head(data.hospital.outcome.state.final[order(data.hospital.outcome.state.final["Hospital.Name"]), c("Hospital.Name")], 1)
+    if(!length(ret_value)){
+        NA
+    }
+    else{
+        ret_value
+    }
 
 }

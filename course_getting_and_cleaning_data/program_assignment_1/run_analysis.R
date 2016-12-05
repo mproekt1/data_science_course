@@ -8,42 +8,94 @@ run_analysis <- function(max_rows = -1){
     
     
     #***********************************************
+    #determine location of data.
+    #the data directory "UCI HAR Dataset" must be located
+    #in the same directory as the script run_analysis.R
+    #the following code determines the current location of run_analysis.R
+    #and uses it to construct a path to data
+    script_dir <- getSrcDirectory(eval(match.call()[[1]]))
+
+    features.txt.path <- paste0(script_dir, "/UCI HAR Dataset/features.txt")
+    activity_labels.txt.path <- paste0(script_dir, "/UCI HAR Dataset/activity_labels.txt")
+
+    X_train.txt.path <- paste0(script_dir, "/UCI HAR Dataset/train/X_train.txt")
+    y_train.txt.path <- paste0(script_dir, "/UCI HAR Dataset/train/y_train.txt")
+    subject_train.txt.path <- paste0(script_dir, "/UCI HAR Dataset/train/subject_train.txt")
+    
+    X_test.txt.path <- paste0(script_dir, "/UCI HAR Dataset/test/X_test.txt")
+    y_test.txt.path <- paste0(script_dir, "/UCI HAR Dataset/test/y_test.txt")
+    subject_test.txt.path <- paste0(script_dir, "/UCI HAR Dataset/test/subject_test.txt")
+    
+    clean_data.txt.path <- paste0(script_dir, "/clean_data.txt")
+    summarised_data.txt.path <- paste0(script_dir, "/summarised_data.txt")
+    
+    #check if data files exist
+    if(file.access(features.txt.path, mode = 0) == -1){
+        stop(paste("Invalid path:", features.txt.path))
+    }
+    else if(file.access(activity_labels.txt.path, mode = 0) == -1){
+        stop(paste("Invalid path:", activity_labels.txt.path))
+    }
+    else if(file.access(X_train.txt.path, mode = 0) == -1){
+        stop(paste("Invalid path:", X_train.txt.path))
+    }
+    else if(file.access(y_train.txt.path, mode = 0) == -1){
+        stop(paste("Invalid path:", y_train.txt.path))
+    }
+    else if(file.access(subject_train.txt.path, mode = 0) == -1){
+        stop(paste("Invalid path:", subject_train.txt.path))
+    }
+    else if(file.access(X_test.txt.path, mode = 0) == -1){
+        stop(paste("Invalid path:", X_test.txt.path))
+    }
+    else if(file.access(y_test.txt.path, mode = 0) == -1){
+        stop(paste("Invalid path:", y_test.txt.path))
+    }
+    else if(file.access(subject_test.txt.path, mode = 0) == -1){
+        stop(paste("Invalid path:", subject_test.txt.path))
+    }
+    
+    #***********************************************
+    
+    
+    
+    #***********************************************
     #feature (measurment) labels
     #will be used as variable names in train and test datasets
-    features.txt <- tbl_df(read.table(file = "UCI HAR Dataset/features.txt", header = FALSE, col.names = c("featureOrder", "featureName")))
+    features.txt <- tbl_df(read.table(file = features.txt.path, header = FALSE, col.names = c("featureOrder", "featureName")))
     
     #the reatures dataset contains dupicate labels
     #rid the dataset of duplicates by giving each duplicate a unigue value
     features.txt <- tbl_df(apply(features.txt, 2, make.unique, sep = "-"))
     
     #activity labels for activity IDs in y_train.txt and y_test.txt
-    activity_labels.txt <- tbl_df(read.table(file = "UCI HAR Dataset/activity_labels.txt", header = FALSE, col.names = c("activityID", "activityName")))
+    activity_labels.txt <- tbl_df(read.table(file = activity_labels.txt.path, header = FALSE, col.names = c("activityID", "activityName")))
     #***********************************************
     
     
     
     #***********************************************
     #load raw train data from X_train.txt file
-    X_train.txt <- tbl_df(read.table(file = "UCI HAR Dataset/train/X_train.txt", header = FALSE, nrows = max_rows))
+    X_train.txt <- tbl_df(read.table(file = X_train.txt.path, header = FALSE, nrows = max_rows))
     
     #load activity IDs for train data in X_train.txt
-    y_train.txt <- tbl_df(read.table(file = "UCI HAR Dataset/train/y_train.txt", header = FALSE, col.names = "activityID", nrows = max_rows))
+    y_train.txt <- tbl_df(read.table(file = y_train.txt.path, header = FALSE, col.names = "activityID", nrows = max_rows))
     
     #load subject IDs for X_train.txt
-    subject_train.txt <- tbl_df(read.table(file = "UCI HAR Dataset/train/subject_train.txt", header = FALSE, col.names = "subjectID", nrows = max_rows))
+    subject_train.txt <- tbl_df(read.table(file = subject_train.txt.path, header = FALSE, col.names = "subjectID", nrows = max_rows))
     #***********************************************
     
     
     
     #***********************************************
     #test features (measurments) raw data
-    X_test.txt <- tbl_df(read.table(file = "UCI HAR Dataset/test/X_test.txt", header = FALSE, nrows = max_rows))
+    X_test.txt <- tbl_df(read.table(file = X_test.txt.path, header = FALSE, nrows = max_rows))
     
     #activity IDs for test data in X_test.txt
-    y_test.txt <- tbl_df(read.table(file = "UCI HAR Dataset/test/y_test.txt", header = FALSE, col.names = "activityID", nrows = max_rows))
+    y_test.txt <- tbl_df(read.table(file = y_test.txt.path, header = FALSE, col.names = "activityID", nrows = max_rows))
 
     #subject IDs for X_test.txt
-    subject_test.txt <- tbl_df(read.table(file = "UCI HAR Dataset/test/subject_test.txt", header = FALSE, col.names = "subjectID", nrows = max_rows))
+    subject_test.txt <- tbl_df(read.table(file = subject_test.txt.path, header = FALSE, col.names = "subjectID", nrows = max_rows))
     #***********************************************
 
     
@@ -123,6 +175,7 @@ run_analysis <- function(max_rows = -1){
     
     #***********************************************
     #save summarised data in file
-    write.table(summarised_data, file = "summarized_data.txt", row.names = FALSE)
+    write.table(clean_data, file = clean_data.txt.path, row.names = FALSE)
+    write.table(summarised_data, file = summarised_data.txt.path, row.names = FALSE)
     #***********************************************
 }
